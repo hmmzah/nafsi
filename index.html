@@ -18,30 +18,24 @@ body {
   padding: 2rem;
 }
 .container { max-width: 480px; }
-.name {
-  font-size: 4rem;
-  font-weight: 300;
-  color: #1D9E75;
-  letter-spacing: 0.05em;
-  margin-bottom: 0.25rem;
-}
-.arabic {
-  font-size: 1.5rem;
-  color: #555;
-  margin-bottom: 1.5rem;
-}
-.tagline {
+.name { font-size: 4rem; font-weight: 300; color: #1D9E75; letter-spacing: 0.05em; margin-bottom: 0.25rem; }
+.arabic { font-size: 1.5rem; color: #555; margin-bottom: 1.5rem; }
+.tagline { font-size: 1.1rem; color: #888; line-height: 1.6; margin-bottom: 3rem; }
+#talkBtn {
+  background: #1D9E75;
+  color: white;
+  border: none;
+  padding: 1rem 2.5rem;
   font-size: 1.1rem;
-  color: #888;
-  line-height: 1.6;
-  margin-bottom: 3rem;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 1rem;
 }
-.disclaimer {
-  font-size: 0.75rem;
-  color: #444;
-  margin-top: 2rem;
-  line-height: 1.5;
-}
+#talkBtn:hover { background: #157a5a; transform: scale(1.02); }
+#talkBtn.active { background: #c0392b; }
+#status { font-size: 0.85rem; color: #555; margin-top: 1rem; min-height: 20px; }
+.disclaimer { font-size: 0.75rem; color: #333; margin-top: 2.5rem; line-height: 1.5; }
 </style>
 </head>
 <body>
@@ -49,16 +43,49 @@ body {
   <div class="name">Nafsi</div>
   <div class="arabic">نفسي</div>
   <div class="tagline">Can't sleep? Your mind won't stop?<br>Talk to Nafsi. No judgment. Just presence.</div>
-
-  <vapi-widget
-    assistant-id="e72c03fa-25a9-4222-8ca4-c5537e334f20"
-    api-url="https://api.vapi.ai"
-    theme="dark"
-    primary-color="#1D9E75"
-  ></vapi-widget>
-
+  <button id="talkBtn" onclick="toggleCall()">Talk to Nafsi</button>
+  <div id="status"></div>
   <p class="disclaimer">Nafsi is an AI companion for emotional support — not a therapist or clinical service.<br>If you are in crisis please call 920033360.</p>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/@vapi-ai/web/dist/vapi-widget.umd.js"></script>
+
+<script>
+  let vapi = null;
+  let active = false;
+  const ASSISTANT_ID = "e72c03fa-25a9-4222-8ca4-c5537e334f20";
+  const PUBLIC_KEY = "YOUR_VAPI_PUBLIC_KEY";
+
+  async function loadVapi() {
+    return new Promise((resolve) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/@vapi-ai/web@2.1.0/dist/vapi.umd.js';
+      s.onload = () => resolve();
+      document.head.appendChild(s);
+    });
+  }
+
+  async function toggleCall() {
+    const btn = document.getElementById('talkBtn');
+    const status = document.getElementById('status');
+
+    if (!active) {
+      status.textContent = 'Connecting...';
+      if (!vapi) {
+        await loadVapi();
+        vapi = new window.Vapi(PUBLIC_KEY);
+      }
+      await vapi.start(ASSISTANT_ID);
+      active = true;
+      btn.textContent = 'End conversation';
+      btn.classList.add('active');
+      status.textContent = 'Connected — speak now';
+    } else {
+      vapi.stop();
+      active = false;
+      btn.textContent = 'Talk to Nafsi';
+      btn.classList.remove('active');
+      status.textContent = '';
+    }
+  }
+</script>
 </body>
 </html>
