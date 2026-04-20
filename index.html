@@ -8,7 +8,7 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
   background: #0a0a0a;
-  color: #ffffff;
+  color: #fff;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   min-height: 100vh;
   display: flex;
@@ -17,7 +17,7 @@ body {
   text-align: center;
   padding: 2rem;
 }
-.container { max-width: 480px; }
+.container { max-width: 480px; width: 100%; }
 .name { font-size: 4rem; font-weight: 300; color: #1D9E75; letter-spacing: 0.05em; margin-bottom: 0.25rem; }
 .arabic { font-size: 1.5rem; color: #555; margin-bottom: 1.5rem; }
 .tagline { font-size: 1.1rem; color: #888; line-height: 1.6; margin-bottom: 3rem; }
@@ -25,17 +25,17 @@ body {
   background: #1D9E75;
   color: white;
   border: none;
-  padding: 1rem 2.5rem;
+  padding: 1.1rem 2.8rem;
   font-size: 1.1rem;
   border-radius: 50px;
   cursor: pointer;
   transition: all 0.2s;
-  margin-bottom: 1rem;
 }
-#talkBtn:hover { background: #157a5a; transform: scale(1.02); }
-#talkBtn.active { background: #c0392b; }
-#status { font-size: 0.85rem; color: #555; margin-top: 1rem; min-height: 20px; }
-.disclaimer { font-size: 0.75rem; color: #333; margin-top: 2.5rem; line-height: 1.5; }
+#talkBtn:hover { background: #157a5a; }
+#talkBtn:disabled { background: #333; cursor: not-allowed; }
+#talkBtn.ending { background: #c0392b; }
+#status { font-size: 0.85rem; color: #555; margin-top: 1rem; min-height: 24px; }
+.disclaimer { font-size: 0.75rem; color: #333; margin-top: 2.5rem; line-height: 1.6; }
 </style>
 </head>
 <body>
@@ -43,49 +43,73 @@ body {
   <div class="name">Nafsi</div>
   <div class="arabic">نفسي</div>
   <div class="tagline">Can't sleep? Your mind won't stop?<br>Talk to Nafsi. No judgment. Just presence.</div>
-  <button id="talkBtn" onclick="toggleCall()">Talk to Nafsi</button>
+  <button id="talkBtn" onclick="startCall()">Talk to Nafsi</button>
   <div id="status"></div>
   <p class="disclaimer">Nafsi is an AI companion for emotional support — not a therapist or clinical service.<br>If you are in crisis please call 920033360.</p>
 </div>
 
-<script>
-  let vapi = null;
-  let active = false;
-  const ASSISTANT_ID = "e72c03fa-25a9-4222-8ca4-c5537e334f20";
-  const PUBLIC_KEY = "9810107b-3056-4332-89f1-ac3f3ba282ee";
+<script type="module">
+import Vapi from 'https://esm.sh/@vapi-ai/web@2.1.0';
 
-  async function loadVapi() {
-    return new Promise((resolve) => {
-      const s = document.createElement('script');
-      s.src = 'https://cdn.jsdelivr.net/npm/@vapi-ai/web@2.1.0/dist/vapi.umd.js';
-      s.onload = () => resolve();
-      document.head.appendChild(s);
-    });
+const PUBLIC_KEY = '9810107b-3056-4332-89f1-ac3f3ba282ee';
+const ASSISTANT_ID = 'e72c03fa-25a9-4222-8ca4-c5537e334f20';
+
+const btn = document.getElementById('talkBtn');
+const status = document.getElementById('status');
+
+let vapi = null;
+let running = false;
+
+window.startCall = async function() {
+  if (running) {
+    vapi.stop();
+    running = false;
+    btn.textContent = 'Talk to Nafsi';
+    btn.classList.remove('ending');
+    status.textContent = '';
+    return;
   }
 
-  async function toggleCall() {
-    const btn = document.getElementById('talkBtn');
-    const status = document.getElementById('status');
+  try {
+    btn.disabled = true;
+    status.textContent = 'Connecting...';
 
-    if (!active) {
-      status.textContent = 'Connecting...';
-      if (!vapi) {
-        await loadVapi();
-        vapi = new window.Vapi(PUBLIC_KEY);
-      }
-      await vapi.start(ASSISTANT_ID);
-      active = true;
+    vapi = new Vapi(PUBLIC_KEY);
+
+    vapi.on('call-start', () => {
+      running = true;
+      btn.disabled = false;
       btn.textContent = 'End conversation';
-      btn.classList.add('active');
+      btn.classList.add('ending');
       status.textContent = 'Connected — speak now';
-    } else {
-      vapi.stop();
-      active = false;
+    });
+
+    vapi.on('call-end', () => {
+      running = false;
       btn.textContent = 'Talk to Nafsi';
-      btn.classList.remove('active');
+      btn.classList.remove('ending');
+      btn.disabled = false;
       status.textContent = '';
-    }
+    });
+
+    vapi.on('error', (e) => {
+      console.error(e);
+      running = false;
+      btn.textContent = 'Talk to Nafsi';
+      btn.classList.remove('ending');
+      btn.disabled = false;
+      status.textContent = 'Could not connect. Please try again.';
+    });
+
+    await vapi.start(ASSISTANT_ID);
+
+  } catch(e) {
+    console.error(e);
+    btn.disabled = false;
+    btn.textContent = 'Talk to Nafsi';
+    status.textContent = 'Could not connect. Please try again.';
   }
+};
 </script>
 </body>
 </html>
