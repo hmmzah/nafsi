@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nafsi — نفسي</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #0a0a0a;
+  color: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+}
+.container { max-width: 480px; }
+.name {
+  font-size: 4rem;
+  font-weight: 300;
+  color: #1D9E75;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.25rem;
+}
+.arabic {
+  font-size: 1.5rem;
+  color: #555;
+  margin-bottom: 1.5rem;
+}
+.tagline {
+  font-size: 1.1rem;
+  color: #888;
+  line-height: 1.6;
+  margin-bottom: 3rem;
+}
+.disclaimer {
+  font-size: 0.75rem;
+  color: #444;
+  margin-top: 2rem;
+  line-height: 1.5;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="name">Nafsi</div>
+  <div class="arabic">نفسي</div>
+  <div class="tagline">Can't sleep? Your mind won't stop?<br>Talk to Nafsi. No judgment. Just presence.</div>
+
+  <vapi-widget
+    assistant-id="e72c03fa-25a9-4222-8ca4-c5537e334f20"
+    api-url="https://api.vapi.ai"
+    theme="dark"
+    primary-color="#1D9E75"
+  ></vapi-widget>
+
+  <p class="disclaimer">Nafsi is an AI companion for emotional support — not a therapist or clinical service.<br>If you are in crisis please call 920033360.</p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@vapi-ai/web@latest/dist/vapi-widget.js"></script>
+</body>
+</html>
